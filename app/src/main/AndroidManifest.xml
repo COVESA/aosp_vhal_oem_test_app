@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="global.covesa.aosp.vhal.test.app">
+
+    <uses-permission android:name="android.car.permission.CAR_INFO" />
+    <uses-permission android:name="android.car.permission.CAR_MILEAGE" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.ADAS_ABS_IS_ENABLED_READ" />
+    <uses-permission android:name="android.car.permission.oem.ADAS_ABS_IS_ENABLED_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_READ" />
+    <uses-permission android:name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.AMBIENT_LIGHT_READ" />
+    <uses-permission android:name="android.car.permission.oem.AMBIENT_LIGHT_WRITE" />
+
+    <application
+        android:name=".Application"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.VehiclePropertiesTestApp">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.VehiclePropertiesTestApp">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
