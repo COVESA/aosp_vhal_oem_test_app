@@ -16,24 +16,27 @@
 package global.covesa.aosp.vhal.test.app
 
 import android.car.Car
-import android.car.VehiclePropertyIds
 import android.car.hardware.CarPropertyValue
 import android.car.hardware.property.CarPropertyManager
 import android.car.hardware.property.CarPropertyManager.CarPropertyEventCallback
 import android.content.Context
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.Log
 import androidx.compose.ui.util.fastJoinToString
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PropertyViewModel @Inject constructor(@param:ApplicationContext private val context: Context) : ViewModel() {
+class PropertyViewModel @Inject constructor(@param:ApplicationContext private val context: Context) :
+		ViewModel() {
 	companion object {
 		private val LOG_TAG = PropertyViewModel::class.simpleName
 	}
@@ -41,19 +44,94 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 
 	private var car: Car? = null
 	private var carPropertyManager: CarPropertyManager? = null
-	private var carPropertyEventCallback: CarPropertyEventCallback? = null
+	private var carPropertyEventCallback: CarPropertyEventCallback = object : CarPropertyEventCallback {
+		override fun onChangeEvent(value: CarPropertyValue<*>) {
+			val property = VEHICLE_PROPERTIES.first { it.id == value.propertyId }
+			Log.d(LOG_TAG, "Changed ${property.name}: ${value.value} (${value})")
+			update(value.propertyId, value.value)
+		}
 
-
-	private val handlerThread = HandlerThread("MyHandlerThread")
-	private var backgroundHandler: Handler? = null
+		override fun onErrorEvent(propId: Int, zone: Int) {
+			showError("Error reading property: ${propId}")
+		}
+	}
 
 	private val errorQueue = mutableListOf<String>()
 	private val _error = MutableStateFlow<String?>(null)
 	val error = _error.asStateFlow()
 
+	private val _ambientLight = MutableStateFlow(VehicleProperty.AMBIENT_LIGHT)
+	val ambientLight = _ambientLight.asStateFlow()
+
+	private val _adasAbsIsEnabled = MutableStateFlow(VehicleProperty.ADAS_ABS_IS_ENABLED)
+	val adasAbsIsEnabled = _adasAbsIsEnabled.asStateFlow()
+
+	private val _adasCruiseControlIsActive =
+		MutableStateFlow(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE)
+	val adasCruiseControlIsActive = _adasCruiseControlIsActive.asStateFlow()
+
+	private val _cabinSunroofShareIsOpen =
+		MutableStateFlow(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN)
+	val cabinSunroofShareIsOpen = _cabinSunroofShareIsOpen.asStateFlow()
+
+	private val _cabinRearShadeIsOpen = MutableStateFlow(VehicleProperty.CABIN_REAR_SHADE_IS_OPEN)
+	val cabinRearShadeIsOpen = _cabinRearShadeIsOpen.asStateFlow()
+
+	private val _powertrainFuelSystemAbsoluteLevel =
+		MutableStateFlow(VehicleProperty.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL)
+	val powertrainFuelSystemAbsoluteLevel = _powertrainFuelSystemAbsoluteLevel.asStateFlow()
+
+	private val _speed = MutableStateFlow(VehicleProperty.SPEED)
+	val speed = _speed.asStateFlow()
+
+	private val _traveledDistance = MutableStateFlow(VehicleProperty.TRAVELED_DISTANCE)
+	val traveledDistance = _traveledDistance.asStateFlow()
+
 	init {
-		handlerThread.start()
-		backgroundHandler = Handler(handlerThread.getLooper())
+		viewModelScope.launch(Dispatchers.Default) {
+			while (isActive) {
+				for (property in VEHICLE_PROPERTIES) {
+					val canRead = context.isGranted(property.readPermission)
+					val canWrite = property.writePermission
+							?.let { context.isGranted(it) } ?: false
+
+					when (property.id) {
+						_ambientLight.value.definition.id -> update(_ambientLight,
+								canRead,
+								canWrite)
+
+						_adasAbsIsEnabled.value.definition.id -> update(_adasAbsIsEnabled,
+								canRead,
+								canWrite)
+
+						_adasCruiseControlIsActive.value.definition.id -> update(
+								_adasCruiseControlIsActive,
+								canRead,
+								canWrite)
+
+						_cabinSunroofShareIsOpen.value.definition.id -> update(
+								_cabinSunroofShareIsOpen,
+								canRead,
+								canWrite)
+
+						_cabinRearShadeIsOpen.value.definition.id -> update(_cabinRearShadeIsOpen,
+								canRead,
+								canWrite)
+
+						_powertrainFuelSystemAbsoluteLevel.value.definition.id -> update(
+								_powertrainFuelSystemAbsoluteLevel,
+								canRead,
+								canWrite)
+
+						_speed.value.definition.id -> update(_speed, canRead, canWrite)
+						_traveledDistance.value.definition.id -> update(_traveledDistance,
+								canRead,
+								canWrite)
+					}
+				}
+				delay(1000)
+			}
+		}
 
 		// Get Car instance using the latest API
 		Log.d(LOG_TAG, "initializeCar: START")
@@ -61,23 +139,20 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 			if (ready) {
 				Log.d(LOG_TAG, "initializeCar: Connected to Car Service")
 				carPropertyManager = car.getCarManager(Car.PROPERTY_SERVICE) as CarPropertyManager
-				backgroundHandler?.post { startVehicleDataCollection() }
+				viewModelScope.launch(Dispatchers.Default) { startVehicleDataCollection() }
 			} else {
 				Log.d(LOG_TAG, "initializeCar: Disconnected from Car Service")
 				carPropertyManager = null
 			}
 		}
 
-		// Check connection to car service
-		if (car != null) {
-			Log.i(LOG_TAG, "initializeCar: Succeeded to create Car instance")
-		} else {
-			Log.e(LOG_TAG, "initializeCar: Failed to create Car instance")
-		}
+		Log.i(LOG_TAG, "initializeCar: Succeeded to create Car instance")
 	}
 
-	fun <T : Any> set(property: PropertyDefinition<T>, value: T) {
+
+	fun <T : Any> set(property: PropertyValue<T>, value: T) {
 		writeProperty(property, value)
+		update(property.definition.id, value)
 	}
 
 	override fun onCleared() {
@@ -95,42 +170,23 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 				return
 			}
 
-
-			carPropertyEventCallback = object : CarPropertyEventCallback {
-				override fun onChangeEvent(value: CarPropertyValue<*>) {
-					val property = VEHICLE_PROPERTIES.firstOrNull { it.id == value.propertyId }
-					if (property != null) updateProperty(property, value.value)
-				}
-
-				override fun onErrorEvent(propId: Int, zone: Int) {
-					showError("Error reading property: ${propId}")
-				}
-			}
-
-			// Register callbacks
-			val propertyIds = intArrayOf(
-					VehiclePropertyIds.INFO_FUEL_CAPACITY,  // normal permission
-					VehiclePropertyIds.PERF_ODOMETER,  // privileged permission
-					VssPropertyIds.AMBIENT_LIGHT,  // normal read, dangerous write permission, new standard prop
-					VssPropertyIds.CABIN_SUNROOF_SHADE_IS_OPEN,  // normal read, dangerous write permission, new standard prop
-					VssPropertyIds.CABIN_REAR_SHADE_IS_OPEN,  // normal read, dangerous write permission, new standard prop
-					VssPropertyIds.ADAS_ABS_IS_ENABLED,  // normal read, dangerous write permission, new standard prop
-					VssPropertyIds.ADAS_CRUISE_CONTROL_IS_ACTIVE // normal read, dangerous write permission, new standard prop
-			)
-			for (propertyId in propertyIds) {
+			for (property in VEHICLE_PROPERTIES) {
+				val propertyId = property.id
+				Log.d(LOG_TAG, "Registering callback for ${property.name}")
 				carPropertyManager?.registerCallback(carPropertyEventCallback, propertyId,
 						CarPropertyManager.SENSOR_RATE_NORMAL)
 			}
 
 			// Get initial values
 			try {
-				readProperty(VEHICLE_PROPERTY_INFO_FUEL_CAPACITY)
-				readProperty(VEHICLE_PROPERTY_PERF_ODOMETER)
-				readProperty(VEHICLE_PROPERTY_AMBIENT_LIGHT)
-				readProperty(VEHICLE_PROPERTY_CABIN_SUNROOF_SHARE_IS_OPEN)
-				readProperty(VEHICLE_PROPERTY_CABIN_REAR_SHADE_IS_OPEN)
-				readProperty(VEHICLE_PROPERTY_ADAS_ABS_IS_ENABLED)
-				readProperty(VEHICLE_PROPERTY_ADAS_CRUISE_CONTROL_IS_ACTIVE)
+				_ambientLight.value = readProperty(VehicleProperty.AMBIENT_LIGHT)
+				_adasAbsIsEnabled.value = readProperty(VehicleProperty.ADAS_ABS_IS_ENABLED)
+				_adasCruiseControlIsActive.value = readProperty(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE)
+				_cabinRearShadeIsOpen.value = readProperty(VehicleProperty.CABIN_REAR_SHADE_IS_OPEN)
+				_cabinSunroofShareIsOpen.value = readProperty(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN)
+				_powertrainFuelSystemAbsoluteLevel.value = readProperty(VehicleProperty.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL)
+				_speed.value = readProperty(VehicleProperty.SPEED)
+				_traveledDistance.value = readProperty(VehicleProperty.TRAVELED_DISTANCE)
 			} catch (e: Exception) {
 				Log.e(LOG_TAG, e.message, e)
 			}
@@ -140,40 +196,68 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 		Log.d(LOG_TAG, "startVehicleDataCollection: DONE")
 	}
 
-	private fun <T : Any> readProperty(property: PropertyDefinition<T>) {
-		try {
-			val value: T? = carPropertyManager?.getProperty<T>(property.id, 0)?.getValue()
-			Log.d(LOG_TAG, "readPropertyBool: ${property.name} = ${value}")
-			updateProperty(property, value)
-		} catch (e: Exception) {
-			Log.d(LOG_TAG, "readPropertyBool: ${property.name} threw ${e.message}")
-			property.mutableValueStateFlow.value = null
-			property.mutableErrorStateFlow.ensure(true)
-			showError("Error reading value for property ${property.name}!", e)
+	private fun <T : Any> readProperty(property: PropertyValue<T>) = try {
+		val value: T? = carPropertyManager?.getProperty<T>(property.definition.id, 0)?.getValue()
+		Log.d(LOG_TAG, "readPropertyBool: ${property.definition.name} = ${value}")
+		property.copy(value = value, hasError = value != null)
+	} catch (e: Exception) {
+		Log.d(LOG_TAG, "readPropertyBool: ${property.definition.name} threw ${e.message}")
+		showError("Error reading value for property ${property.definition.name}!", e)
+		property.copy(value = null, hasError = true)
+	}
+
+	private fun <T : Any> update(state: MutableStateFlow<PropertyValue<T>>, value: Any?) {
+		if (state.value == value) return
+		val property = state.value
+		state.value = try {
+			if (value != null) property.copy(value = value as T, hasError = false)
+			else property.copy(value = null, hasError = true)
+		} catch (e: ClassCastException) {
+			showError("Error updating property ${property.definition.name} with value \"${value}\" of type ${value?.javaClass}!",
+					e)
+			property.copy(value = null, hasError = true)
 		}
 	}
 
-	private fun <T : Any> updateProperty(property: PropertyDefinition<T>, value: Any?) = try {
-		if (value != null) {
-			property.mutableValueStateFlow.value = value as T
-			property.mutableErrorStateFlow.ensure(false)
-		} else {
-			property.mutableValueStateFlow.value = null
-			property.mutableErrorStateFlow.ensure(true)
+	private fun <T : Any> update(state: MutableStateFlow<PropertyValue<T>>,
+								 canRead: Boolean,
+								 canWrite: Boolean) {
+		if (state.value.canRead != canRead || state.value.canWrite != canWrite) {
+			state.value = state.value.copy(canRead = canRead, canWrite = canWrite)
+			if (canRead) {
+				carPropertyManager?.registerCallback(carPropertyEventCallback,
+						state.value.definition.id,
+						CarPropertyManager.SENSOR_RATE_NORMAL)
+			}
 		}
-	} catch (e: ClassCastException) {
-		property.mutableValueStateFlow.value = null
-		property.mutableErrorStateFlow.ensure(true)
-		showError("Error updating property ${property.name} with value \"${value}\" of type ${value?.javaClass}!", e)
 	}
 
-	private fun <T : Any> writeProperty(property: PropertyDefinition<T>, value: T) {
-		Log.d(LOG_TAG, "writePropertyBool: ${property.name} = ${property.mutableValueStateFlow.value} -> ${value}")
-		if (property.mutableValueStateFlow.value != value) try {
-			carPropertyManager!!.setProperty(property::type.javaClass, property.id, 0, value)
-			property.mutableValueStateFlow.value = value
-		} catch (e: Exception) {
-			showError("Error setting value for property ${property.name}!")
+	private fun update(propertyId: Int, value: Any) = when (propertyId) {
+		_ambientLight.value.definition.id -> update(_ambientLight, value)
+		_adasAbsIsEnabled.value.definition.id -> update(_adasAbsIsEnabled, value)
+		_adasCruiseControlIsActive.value.definition.id -> update(_adasCruiseControlIsActive, value)
+		_cabinSunroofShareIsOpen.value.definition.id -> update(_cabinSunroofShareIsOpen, value)
+		_cabinRearShadeIsOpen.value.definition.id -> update(_cabinRearShadeIsOpen, value)
+		_powertrainFuelSystemAbsoluteLevel.value.definition.id -> update(
+				_powertrainFuelSystemAbsoluteLevel,
+				value)
+
+		_speed.value.definition.id -> update(_speed, value)
+		_traveledDistance.value.definition.id -> update(_traveledDistance, value)
+		else -> {}
+	}
+
+	private fun <T : Any> writeProperty(property: PropertyValue<T>, value: T) {
+		Log.d(LOG_TAG,
+				"writePropertyBool: ${property.definition.name} = ${property.value} -> ${value}")
+		if (property.value != value) try {
+			carPropertyManager!!.setProperty(property.definition.type.java,
+					property.definition.id,
+					0,
+					value)
+			update(property.definition.id, value)
+		} catch (_: Exception) {
+			showError("Error setting value for property ${property.definition.name}!")
 		}
 	}
 

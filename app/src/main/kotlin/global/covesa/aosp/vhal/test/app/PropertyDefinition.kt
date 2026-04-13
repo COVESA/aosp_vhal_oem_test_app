@@ -15,18 +15,23 @@
  */
 package global.covesa.aosp.vhal.test.app
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlin.reflect.KClass
 
-data class PropertyDefinition<T : Any>(val type: KClass<T>,
+data class PropertyDefinition<T : Any>(val id: Int,
 									   val name: String,
-									   val id: Int,
+									   val type: KClass<T>,
+									   val readPermission: String,
+									   val writePermission: String?,
 									   val unitsOrEnum: String) {
-	val mutableValueStateFlow = MutableStateFlow<T?>(null)
-	val valueStateFlow = mutableValueStateFlow.asStateFlow()
+	val permissions: List<String>
+		get() = listOfNotNull(readPermission, writePermission)
 
-	val mutableErrorStateFlow = MutableStateFlow(false)
-	val errorStateFlow = mutableErrorStateFlow.asStateFlow()
+	val units: String?
+		get() = when (type) {
+			Float::class, Int::class -> unitsOrEnum
+			else -> null
+		}
 
+	val options: List<String>
+		get() = if (type == Boolean::class) unitsOrEnum.split("|") else emptyList()
 }

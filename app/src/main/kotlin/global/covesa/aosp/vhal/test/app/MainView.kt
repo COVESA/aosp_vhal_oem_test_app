@@ -15,6 +15,10 @@
  */
 package global.covesa.aosp.vhal.test.app
 
+import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,135 +30,71 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import global.covesa.aosp.vhal.test.app.theme.AppTheme
 
 @Composable
 fun MainView(viewModel: PropertyViewModel = hiltViewModel()) {
-	val ambientLightValue by VEHICLE_PROPERTY_AMBIENT_LIGHT.valueStateFlow.collectAsState()
-	val ambientLightText by remember(ambientLightValue) {
-		derivedStateOf { VEHICLE_PROPERTY_AMBIENT_LIGHT.format(ambientLightValue) }
-	}
-	val ambientLightError by VEHICLE_PROPERTY_AMBIENT_LIGHT.errorStateFlow.collectAsState()
-
-	val infoFuelCapacityValue by VEHICLE_PROPERTY_INFO_FUEL_CAPACITY.valueStateFlow.collectAsState()
-	val infoFuelCapacityText by remember(infoFuelCapacityValue) {
-		derivedStateOf { VEHICLE_PROPERTY_INFO_FUEL_CAPACITY.format(infoFuelCapacityValue) }
-	}
-	val infoFuelCapacityError by VEHICLE_PROPERTY_INFO_FUEL_CAPACITY.errorStateFlow.collectAsState()
-
-	val perfOdometerValue by VEHICLE_PROPERTY_PERF_ODOMETER.valueStateFlow.collectAsState()
-	val perfOdometerText by remember(perfOdometerValue) {
-		derivedStateOf { VEHICLE_PROPERTY_PERF_ODOMETER.format(perfOdometerValue) }
-	}
-	val perfOdometerError by VEHICLE_PROPERTY_PERF_ODOMETER.errorStateFlow.collectAsState()
-
-	val cabinRearShadeIsOpenValue by VEHICLE_PROPERTY_CABIN_REAR_SHADE_IS_OPEN.valueStateFlow.collectAsState()
-	val cabinRearShadeIsOpenText by remember(cabinRearShadeIsOpenValue) {
-		derivedStateOf { VEHICLE_PROPERTY_CABIN_REAR_SHADE_IS_OPEN.format(cabinRearShadeIsOpenValue) }
-	}
-	val cabinRearShadeIsOpenError by VEHICLE_PROPERTY_CABIN_REAR_SHADE_IS_OPEN.errorStateFlow.collectAsState()
-
-	val cabinSunroofShareIsOpenValue by VEHICLE_PROPERTY_CABIN_SUNROOF_SHARE_IS_OPEN.valueStateFlow.collectAsState()
-	val cabinSunroofShareIsOpenText by remember(cabinSunroofShareIsOpenValue) {
-		derivedStateOf { VEHICLE_PROPERTY_CABIN_SUNROOF_SHARE_IS_OPEN.format(cabinSunroofShareIsOpenValue) }
-	}
-	val cabinSunroofShareIsOpenError by VEHICLE_PROPERTY_CABIN_SUNROOF_SHARE_IS_OPEN.errorStateFlow.collectAsState()
-
-	val adasAbsIsEnabledValue by VEHICLE_PROPERTY_ADAS_ABS_IS_ENABLED.valueStateFlow.collectAsState()
-	val adasAbsIsEnabledText by remember(adasAbsIsEnabledValue) {
-		derivedStateOf { VEHICLE_PROPERTY_ADAS_ABS_IS_ENABLED.format(adasAbsIsEnabledValue) }
-	}
-	val adasAbsIsEnabledError by VEHICLE_PROPERTY_ADAS_ABS_IS_ENABLED.errorStateFlow.collectAsState()
-
-	val adasCruiseControlIsActiveValue by VEHICLE_PROPERTY_ADAS_CRUISE_CONTROL_IS_ACTIVE.valueStateFlow.collectAsState()
-	val adasCruiseControlIsActiveText by remember(adasCruiseControlIsActiveValue) {
-		derivedStateOf { VEHICLE_PROPERTY_ADAS_CRUISE_CONTROL_IS_ACTIVE.format(adasCruiseControlIsActiveValue) }
-	}
-	val adasCruiseControlIsActiveError by VEHICLE_PROPERTY_ADAS_CRUISE_CONTROL_IS_ACTIVE.errorStateFlow.collectAsState()
+	val ambientLight by viewModel.ambientLight.collectAsState()
+	val adasAbsIsEnabled by viewModel.adasAbsIsEnabled.collectAsState()
+	val adasCruiseControlIsActive by viewModel.adasCruiseControlIsActive.collectAsState()
+	val cabinRearShadeIsOpen by viewModel.cabinRearShadeIsOpen.collectAsState()
+	val cabinSunroofShareIsOpen by viewModel.cabinSunroofShareIsOpen.collectAsState()
+	val powertrainFuelSystemAbsoluteLevel by viewModel.powertrainFuelSystemAbsoluteLevel.collectAsState()
+	val speed by viewModel.speed.collectAsState()
+	val traveledDistance by viewModel.traveledDistance.collectAsState()
 	val error by viewModel.error.collectAsState()
 
-	MainView(ambientLightValue = ambientLightValue,
-			ambientLightText = ambientLightText,
-			ambientLightError = ambientLightError,
-			infoFuelCapacityValue = infoFuelCapacityValue,
-			infoFuelCapacityText = infoFuelCapacityText,
-			infoFuelCapacityError = infoFuelCapacityError,
-			perfOdometerValue = perfOdometerValue,
-			perfOdometerText = perfOdometerText,
-			perfOdometerError = perfOdometerError,
-			cabinRearShadeIsOpenValue = cabinRearShadeIsOpenValue,
-			cabinRearShadeIsOpenText = cabinRearShadeIsOpenText,
-			cabinRearShadeIsOpenError = cabinRearShadeIsOpenError,
-			cabinSunroofShareIsOpenValue = cabinSunroofShareIsOpenValue,
-			cabinSunroofShareIsOpenText = cabinSunroofShareIsOpenText,
-			cabinSunroofShareIsOpenError = cabinSunroofShareIsOpenError,
-			onCabinSunroofShadeIsOpen = { viewModel.set(VEHICLE_PROPERTY_CABIN_SUNROOF_SHARE_IS_OPEN, it) },
-			adasAbsIsEnabledValue = adasAbsIsEnabledValue,
-			adasAbsIsEnabledText = adasAbsIsEnabledText,
-			adasAbsIsEnabledError = adasAbsIsEnabledError,
-			onAdasAbsIsEnabled = { viewModel.set(VEHICLE_PROPERTY_ADAS_ABS_IS_ENABLED, it) },
-			adasCruiseControlIsActiveValue = adasCruiseControlIsActiveValue,
-			adasCruiseControlIsActiveText = adasCruiseControlIsActiveText,
-			adasCruiseControlIsActiveError = adasCruiseControlIsActiveError,
-			onAdasCruiseControlIsActive = { viewModel.set(VEHICLE_PROPERTY_ADAS_CRUISE_CONTROL_IS_ACTIVE, it) },
+	MainView(
+			ambientLight = ambientLight,
+			adasAbsIsEnabled = adasAbsIsEnabled,
+			adasCruiseControlIsActive = adasCruiseControlIsActive,
+			cabinRearShadeIsOpen = cabinRearShadeIsOpen,
+			cabinSunroofShareIsOpen = cabinSunroofShareIsOpen,
+			powertrainFuelSystemAbsoluteLevel = powertrainFuelSystemAbsoluteLevel,
+			speed = speed,
+			traveledDistance = traveledDistance,
 			error = error,
+			onSwitch = { viewModel.set(it, it.value != true) },
 			onDismissError = viewModel::dismissError)
 }
 
 @Composable
-fun MainView(ambientLightValue: Boolean?,
-			 ambientLightText: String,
-			 ambientLightError: Boolean,
-			 infoFuelCapacityValue: Float?,
-			 infoFuelCapacityText: String,
-			 infoFuelCapacityError: Boolean,
-			 perfOdometerValue: Float?,
-			 perfOdometerText: String,
-			 perfOdometerError: Boolean,
-			 cabinRearShadeIsOpenValue: Boolean?,
-			 cabinRearShadeIsOpenText: String,
-			 cabinRearShadeIsOpenError: Boolean,
-			 cabinSunroofShareIsOpenValue: Boolean?,
-			 cabinSunroofShareIsOpenText: String,
-			 cabinSunroofShareIsOpenError: Boolean,
-			 onCabinSunroofShadeIsOpen: (Boolean) -> Unit,
-			 adasAbsIsEnabledValue: Boolean?,
-			 adasAbsIsEnabledText: String,
-			 adasAbsIsEnabledError: Boolean,
-			 onAdasAbsIsEnabled: (Boolean) -> Unit,
-			 adasCruiseControlIsActiveValue: Boolean?,
-			 adasCruiseControlIsActiveText: String,
-			 adasCruiseControlIsActiveError: Boolean,
-			 onAdasCruiseControlIsActive: (Boolean) -> Unit,
+fun MainView(ambientLight: PropertyValue<Boolean>,
+			 adasAbsIsEnabled: PropertyValue<Boolean>,
+			 adasCruiseControlIsActive: PropertyValue<Boolean>,
+			 cabinRearShadeIsOpen: PropertyValue<Boolean>,
+			 cabinSunroofShareIsOpen: PropertyValue<Boolean>,
+			 powertrainFuelSystemAbsoluteLevel: PropertyValue<Float>,
+			 speed: PropertyValue<Float>,
+			 traveledDistance: PropertyValue<Float>,
 			 error: String?,
+			 onSwitch: (PropertyValue<Boolean>) -> Unit,
 			 onDismissError: () -> Unit) {
 	Surface {
 		Box(modifier = Modifier.fillMaxSize()) {
 			Column(modifier = Modifier
 					.fillMaxSize()
-					.padding(16.dp),
-					verticalArrangement = Arrangement.spacedBy(16.dp)) {
+					.padding(top = 16.dp, bottom = 64.dp),
+					verticalArrangement = Arrangement.SpaceBetween) {
 				Row(modifier = Modifier.fillMaxWidth(),
 						horizontalArrangement = Arrangement.Center,
 						verticalAlignment = Alignment.CenterVertically) {
@@ -168,62 +108,159 @@ fun MainView(ambientLightValue: Boolean?,
 					Text("VHAL Test App", style = MaterialTheme.typography.headlineLarge)
 				}
 
-				Text(text = stringResource(R.string.ambient_light, ambientLightText),
-						color = if (ambientLightError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
-				Text(text = stringResource(R.string.info_fuel_capacity, infoFuelCapacityText),
-						color = if (infoFuelCapacityError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
-				Text(text = stringResource(R.string.perf_odometer, perfOdometerText),
-						color = if (perfOdometerError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
-				Text(text = stringResource(R.string.cabin_rear_shade_is_open, cabinRearShadeIsOpenText),
-						color = if (cabinRearShadeIsOpenError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
+				if (!speed.canRead
+					&& !powertrainFuelSystemAbsoluteLevel.canRead
+					&& !traveledDistance.canRead
+					&& !ambientLight.canRead
+					&& !adasAbsIsEnabled.canRead
+					&& !adasCruiseControlIsActive.canRead
+					&& !cabinRearShadeIsOpen.canRead
+					&& !cabinSunroofShareIsOpen.canRead) Text(
+						modifier = Modifier.align(Alignment.CenterHorizontally),
+						text = "This vehicle does not provide any required data or functions",
+						style = MaterialTheme.typography.displayMedium,
+						color = MaterialTheme.colorScheme.error)
 
-				SwitchButton(
-						modifier = Modifier.fillMaxWidth(),
-						text = stringResource(R.string.cabin_sunroof_shade_is_open, cabinSunroofShareIsOpenText),
-						isChecked = cabinSunroofShareIsOpenValue == true,
-						isEnabled = cabinSunroofShareIsOpenValue != null,
-						hasError = cabinSunroofShareIsOpenError,
-						onChecked = onCabinSunroofShadeIsOpen,
-				)
-				SwitchButton(
-						modifier = Modifier.fillMaxWidth(),
-						text = stringResource(R.string.adas_abs_is_enabled, adasAbsIsEnabledText),
-						isChecked = adasAbsIsEnabledValue == true,
-						isEnabled = adasAbsIsEnabledValue != null,
-						hasError = adasAbsIsEnabledError,
-						onChecked = onAdasAbsIsEnabled)
-				SwitchButton(
-						modifier = Modifier.fillMaxWidth(),
-						text = stringResource(R.string.adas_cruise_control_is_active, adasCruiseControlIsActiveText),
-						isChecked = adasCruiseControlIsActiveValue == true,
-						isEnabled = adasCruiseControlIsActiveValue != null,
-						hasError = adasCruiseControlIsActiveError,
-						onChecked = onAdasCruiseControlIsActive)
+				Row(modifier = Modifier
+						.padding(top = 16.dp)
+						.align(Alignment.CenterHorizontally),
+						horizontalArrangement = Arrangement.spacedBy(64.dp)) {
+					if (speed.canRead) Gauge(modifier = Modifier,
+							value = speed.value,
+							format = "%.0f",
+							max = 250,
+							units = speed.definition.units ?: "km/h",
+							hasError = speed.hasError)
+					if (powertrainFuelSystemAbsoluteLevel.canRead) Gauge(modifier = Modifier,
+							value = powertrainFuelSystemAbsoluteLevel.value,
+							format = "%.1f",
+							max = 60,
+							units = powertrainFuelSystemAbsoluteLevel.definition.units ?: "l",
+							hasError = speed.hasError)
+				}
+
+				if (traveledDistance.canRead) Text(modifier = Modifier.align(Alignment.CenterHorizontally),
+						text = traveledDistance.format(),
+						style = MaterialTheme.typography.displayLarge,
+						/*color = if (traveledDistance.hasError)
+							MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface*/)
+
+				Row(modifier = Modifier.fillMaxWidth().padding(start = 32.dp),
+						horizontalArrangement = Arrangement.SpaceEvenly) {
+					Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+						SwitchButton(
+								textId = R.string.ambient_light,
+								property = ambientLight,
+								onChecked = onSwitch)
+					}
+					Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+						SwitchButton(
+								textId = R.string.adas_abs_is_enabled,
+								property = adasAbsIsEnabled,
+								onChecked = onSwitch)
+						SwitchButton(
+								textId = R.string.adas_cruise_control_is_active,
+								property = adasCruiseControlIsActive,
+								onChecked = onSwitch)
+					}
+					Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+						SwitchButton(
+								textId = R.string.cabin_rear_shade_is_open,
+								property = cabinRearShadeIsOpen,
+								onChecked = onSwitch)
+						SwitchButton(
+								textId = R.string.cabin_sunroof_shade_is_open,
+								property = cabinSunroofShareIsOpen,
+								onChecked = onSwitch)
+					}
+				}
 			}
-			if (error != null) Snackbar(modifier = Modifier.align(Alignment.BottomCenter),
-					dismissAction = { TextButton(onClick = onDismissError) { Text("Dismiss") } },
-					content = { Text(error) })
+			//if (error != null) Snackbar(modifier = Modifier.align(Alignment.BottomCenter),
+			//		dismissAction = { TextButton(onClick = onDismissError) { Text("Dismiss") } },
+			//		content = { Text(error) })
 		}
 	}
 }
 
 @Composable
-private fun SwitchButton(text: String,
-						 isChecked: Boolean,
-						 isEnabled: Boolean,
-						 hasError: Boolean,
-						 onChecked: (Boolean) -> Unit,
+private fun Gauge(
+	value: Number?,
+	format: String,
+	max: Number,
+	units: String,
+	hasError: Boolean,
+	modifier: Modifier = Modifier) {
+	val rawProgress = ((value ?: 0).toFloat() / max.toFloat()).coerceIn(0f, 1f)
+	val progress by animateFloatAsState(
+			targetValue = rawProgress,
+			animationSpec = tween(durationMillis = 500),
+			label = "speedGaugeProgress")
+	val gaugeColor = /*if (hasError)
+		MaterialTheme.colorScheme.error else*/ MaterialTheme.colorScheme.primary
+	val gaugeTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+
+	Box(modifier = modifier) {
+		Canvas(modifier = Modifier.size(280.dp)) {
+			val stroke = 24.dp.toPx()
+			val arcSize = size.minDimension - stroke
+			val topLeft = androidx.compose.ui.geometry.Offset((size.width - arcSize) / 2f,
+					(size.height - arcSize) / 2f)
+			val arc = androidx.compose.ui.geometry.Size(arcSize, arcSize)
+
+			drawArc(
+					color = gaugeTrackColor,
+					startAngle = 150f,
+					sweepAngle = 240f,
+					useCenter = false,
+					topLeft = topLeft,
+					size = arc,
+					style = Stroke(width = stroke, cap = StrokeCap.Round),
+			)
+
+			drawArc(
+					color = gaugeColor,
+					startAngle = 150f,
+					sweepAngle = 240f * progress,
+					useCenter = false,
+					topLeft = topLeft,
+					size = arc,
+					style = Stroke(width = stroke, cap = StrokeCap.Round),
+			)
+		}
+
+		Column(modifier = Modifier.align(Alignment.Center),
+				horizontalAlignment = Alignment.CenterHorizontally,
+				verticalArrangement = Arrangement.spacedBy(4.dp)) {
+			Text(text = value?.let { format.format(it) } ?: "---",
+					style = MaterialTheme.typography.displayLarge,
+					color = /*if (hasError)
+						MaterialTheme.colorScheme.error else*/ MaterialTheme.colorScheme.onSurface)
+			Text(text = units,
+					style = MaterialTheme.typography.titleMedium,
+					color = MaterialTheme.colorScheme.onSurfaceVariant)
+			//if (hasError) Text(text = "Read error",
+			//			color = MaterialTheme.colorScheme.error,
+			//			style = MaterialTheme.typography.bodyMedium)
+		}
+	}
+}
+
+
+@Composable
+private fun SwitchButton(@StringRes textId: Int,
+						 property: PropertyValue<Boolean>,
+						 onChecked: (PropertyValue<Boolean>) -> Unit,
 						 modifier: Modifier = Modifier) {
-	Row(
+	if (property.canRead) Row(
 			modifier = modifier,
-			horizontalArrangement = Arrangement.SpaceBetween,
-			verticalAlignment = Alignment.CenterVertically,
-	) {
-		Text(text = text,
-				color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
-		Switch(checked = isChecked,
-				enabled = isEnabled,
-				onCheckedChange = onChecked)
+			horizontalArrangement = Arrangement.spacedBy(16.dp),
+			verticalAlignment = Alignment.CenterVertically) {
+		Switch(checked = property.value == true,
+				enabled = property.canWrite,
+				onCheckedChange = { onChecked(property) })
+		Text(text = stringResource(textId, property.format()),
+				/*color = if (property.hasError) MaterialTheme.colorScheme.error else
+					MaterialTheme.colorScheme.onSurface*/)
 	}
 }
 
@@ -231,35 +268,156 @@ private fun SwitchButton(text: String,
 @Composable
 private fun MainViewPreview() {
 	AppTheme {
-		var cabinSunroofShareIsOpenValue by remember { mutableStateOf(true) }
-		var adasAbsIsEnabledValue by remember { mutableStateOf(true) }
-		var adasCruiseControlIsActiveValue by remember { mutableStateOf<Boolean?>(null) }
+		var ambientLight by remember {
+			mutableStateOf(VehicleProperty.AMBIENT_LIGHT.copy(
+					value = false,
+					hasError = false,
+					canRead = true,
+					canWrite = true))
+		}
+		var adasAbsIsEnabled by remember {
+			mutableStateOf(VehicleProperty.ADAS_ABS_IS_ENABLED.copy(
+					value = false,
+					hasError = false,
+					canRead = true,
+					canWrite = false))
+		}
+		var adasCruiseControlIsActive by remember {
+			mutableStateOf(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE.copy(
+					value = true,
+					hasError = false,
+					canRead = true,
+					canWrite = true))
+		}
+		var cabinRearShadeIsOpen by remember {
+			mutableStateOf(VehicleProperty.CABIN_REAR_SHADE_IS_OPEN.copy(
+					value = false,
+					hasError = false,
+					canRead = true,
+					canWrite = true))
+		}
+		var cabinSunroofShareIsOpen by remember {
+			mutableStateOf(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN.copy(
+					value = true,
+					hasError = false,
+					canRead = true,
+					canWrite = false))
+		}
 		MainView(
-				ambientLightValue = null,
-				ambientLightText = "Off",
-				ambientLightError = false,
-				infoFuelCapacityValue = 12574.0f,
-				infoFuelCapacityText = "12574 ml",
-				infoFuelCapacityError = false,
-				perfOdometerValue = 25357.0f,
-				perfOdometerText = "25357 km",
-				perfOdometerError = false,
-				cabinRearShadeIsOpenValue = false,
-				cabinRearShadeIsOpenText = "Closed",
-				cabinRearShadeIsOpenError = false,
-				cabinSunroofShareIsOpenValue = cabinSunroofShareIsOpenValue,
-				cabinSunroofShareIsOpenText = if (cabinSunroofShareIsOpenValue) "Open" else "Closed",
-				cabinSunroofShareIsOpenError = false,
-				onCabinSunroofShadeIsOpen = { cabinSunroofShareIsOpenValue = it },
-				adasAbsIsEnabledValue = adasAbsIsEnabledValue,
-				adasAbsIsEnabledText = if (adasAbsIsEnabledValue) "Enabled" else "Disabled",
-				adasAbsIsEnabledError = true,
-				onAdasAbsIsEnabled = { adasAbsIsEnabledValue = it },
-				adasCruiseControlIsActiveValue = adasCruiseControlIsActiveValue,
-				adasCruiseControlIsActiveText = if (adasCruiseControlIsActiveValue == true) "Active" else "Off",
-				adasCruiseControlIsActiveError = false,
-				onAdasCruiseControlIsActive = { adasCruiseControlIsActiveValue = it },
+				ambientLight = ambientLight,
+				adasAbsIsEnabled = adasAbsIsEnabled,
+				adasCruiseControlIsActive = adasCruiseControlIsActive,
+				cabinRearShadeIsOpen = cabinRearShadeIsOpen,
+				cabinSunroofShareIsOpen = cabinSunroofShareIsOpen,
+				powertrainFuelSystemAbsoluteLevel = VehicleProperty.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL.copy(
+						value = 42.5f,
+						hasError = false,
+						canRead = true),
+				speed = VehicleProperty.SPEED.copy(value = 120f, hasError = false, canRead = true),
+				traveledDistance = VehicleProperty.TRAVELED_DISTANCE.copy(value = 1234.5f,
+						hasError = false,
+						canRead = true),
 				error = "This is a test message",
+				onSwitch = {
+					when (it.definition.id) {
+						ambientLight.definition.id -> ambientLight = ambientLight
+								.copy(value = it.value != true)
+
+						adasAbsIsEnabled.definition.id -> adasAbsIsEnabled = adasAbsIsEnabled
+								.copy(value = it.value != true)
+
+						adasCruiseControlIsActive.definition.id -> adasCruiseControlIsActive =
+							adasCruiseControlIsActive
+									.copy(value = it.value != true)
+
+						cabinRearShadeIsOpen.definition.id -> cabinRearShadeIsOpen =
+							cabinRearShadeIsOpen
+									.copy(value = it.value != true)
+
+						cabinSunroofShareIsOpen.definition.id -> cabinSunroofShareIsOpen =
+							cabinSunroofShareIsOpen
+									.copy(value = it.value != true)
+					}
+				},
+				onDismissError = {})
+	}
+}
+
+@Preview(device = "id:automotive_1408p_landscape_with_google_apis")
+@Composable
+private fun MainViewNoPermissionsPreview() {
+	AppTheme {
+		var ambientLight by remember {
+			mutableStateOf(VehicleProperty.AMBIENT_LIGHT.copy(
+					value = false,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		var adasAbsIsEnabled by remember {
+			mutableStateOf(VehicleProperty.ADAS_ABS_IS_ENABLED.copy(
+					value = false,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		var adasCruiseControlIsActive by remember {
+			mutableStateOf(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE.copy(
+					value = true,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		var cabinRearShadeIsOpen by remember {
+			mutableStateOf(VehicleProperty.CABIN_REAR_SHADE_IS_OPEN.copy(
+					value = false,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		var cabinSunroofShareIsOpen by remember {
+			mutableStateOf(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN.copy(
+					value = true,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		MainView(
+				ambientLight = ambientLight,
+				adasAbsIsEnabled = adasAbsIsEnabled,
+				adasCruiseControlIsActive = adasCruiseControlIsActive,
+				cabinRearShadeIsOpen = cabinRearShadeIsOpen,
+				cabinSunroofShareIsOpen = cabinSunroofShareIsOpen,
+				powertrainFuelSystemAbsoluteLevel = VehicleProperty.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL.copy(
+						value = 42.5f,
+						hasError = false,
+						canRead = false),
+				speed = VehicleProperty.SPEED.copy(value = 120f, hasError = false, canRead = false),
+				traveledDistance = VehicleProperty.TRAVELED_DISTANCE.copy(value = 1234.5f,
+						hasError = false,
+						canRead = false),
+				error = "This is a test message",
+				onSwitch = {
+					when (it.definition.id) {
+						ambientLight.definition.id -> ambientLight = ambientLight
+								.copy(value = it.value != true)
+
+						adasAbsIsEnabled.definition.id -> adasAbsIsEnabled = adasAbsIsEnabled
+								.copy(value = it.value != true)
+
+						adasCruiseControlIsActive.definition.id -> adasCruiseControlIsActive =
+							adasCruiseControlIsActive
+									.copy(value = it.value != true)
+
+						cabinRearShadeIsOpen.definition.id -> cabinRearShadeIsOpen =
+							cabinRearShadeIsOpen
+									.copy(value = it.value != true)
+
+						cabinSunroofShareIsOpen.definition.id -> cabinSunroofShareIsOpen =
+							cabinSunroofShareIsOpen
+									.copy(value = it.value != true)
+					}
+				},
 				onDismissError = {})
 	}
 }

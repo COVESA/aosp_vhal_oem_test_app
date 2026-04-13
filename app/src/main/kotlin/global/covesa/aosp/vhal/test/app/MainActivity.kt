@@ -20,36 +20,36 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import global.covesa.aosp.vhal.test.app.theme.AppTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 	companion object {
 		private val LOG_TAG = MainActivity::class.simpleName
 		private const val PERMISSION_REQUEST_CODE: Int = 100
-
-		private val CAR_PERMISSIONS: Array<String?> = arrayOf<String?>(
-				"android.car.permission.CAR_MILEAGE",
-				"android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ",
-				"android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_WRITE",
-				"android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ",
-				"android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE",
-				"android.car.permission.oem.ADAS_ABS_IS_ENABLED_READ",
-				"android.car.permission.oem.ADAS_ABS_IS_ENABLED_WRITE",
-				"android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_READ",
-				"android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_WRITE"
-		)
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent { AppTheme { MainView() } }
+		lifecycleScope.launch {
+			while (isActive) {
+				checkAndRequestPermissions()
+				delay(5000)
+			}
+		}
+	}
 
+	private fun checkAndRequestPermissions() {
 		Log.d(LOG_TAG, "Checking permissions: START")
 		val permissionsToRequest: MutableList<String?> = ArrayList()
-		for (permission in CAR_PERMISSIONS) {
-			if (checkSelfPermission(permission!!) != PackageManager.PERMISSION_GRANTED) {
+		for (permission in VEHICLE_PROPERTIES.flatMap { it.permissions }) {
+			if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
 				Log.d(LOG_TAG, "${permission} is not granted yet, requesting permission")
 				permissionsToRequest.add(permission)
 			}
@@ -57,11 +57,10 @@ class MainActivity : ComponentActivity() {
 		if (!permissionsToRequest.isEmpty()) {
 			requestPermissions(permissionsToRequest.toTypedArray(), PERMISSION_REQUEST_CODE)
 		}
-		Log.d(LOG_TAG, "Checking permissions: DONE")
-
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 		if (requestCode == PERMISSION_REQUEST_CODE) {
 			for (i in permissions.indices) {
 				val granted = grantResults[i] == PackageManager.PERMISSION_GRANTED

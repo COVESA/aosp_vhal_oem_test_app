@@ -15,35 +15,36 @@
  */
 package global.covesa.aosp.vhal.test.app
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import android.content.Context
+import android.content.pm.PackageManager
 import kotlin.reflect.KProperty0
 
-fun property(property: KProperty0<Int>, units: String = "") = PropertyDefinition(
-		type = Float::class,
-		name = property.name,
+val VEHICLE_PROPERTIES = mutableListOf<PropertyDefinition<*>>()
+
+inline fun <reified T : Any> defineProperty(property: KProperty0<Int>,
+											units: String,
+											isWriteable: Boolean = false) = PropertyDefinition(
 		id = property.get(),
+		name = property.name,
+		type = T::class,
+		readPermission = "android.car.permission.oem.${property.name}_READ",
+		writePermission = "android.car.permission.oem.${property.name}_WRITE".takeIf { isWriteable },
 		unitsOrEnum = units)
+		.also { VEHICLE_PROPERTIES.add(it) }
+		.let { PropertyValue(definition = it) }
 
-fun property(property: KProperty0<Int>, enabled: String, disabled: String) = PropertyDefinition(
-		type = Boolean::class,
-		name = property.name,
+fun defineProperty(property: KProperty0<Int>,
+				   enabled: String,
+				   disabled: String,
+				   isWriteable: Boolean = true) = PropertyDefinition(
 		id = property.get(),
+		name = property.name,
+		type = Boolean::class,
+		readPermission = "android.car.permission.oem.${property.name}_READ",
+		writePermission = "android.car.permission.oem.${property.name}_WRITE".takeIf { isWriteable },
 		unitsOrEnum = "${enabled}|${disabled}")
+		.also { VEHICLE_PROPERTIES.add(it) }
+		.let { PropertyValue(definition = it) }
 
-
-private val <T : Any> PropertyDefinition<T>.units: String?
-	get() = if (type == Float::class) unitsOrEnum else null
-
-private val <T : Any> PropertyDefinition<T>.options: List<String>
-	get() = if (type == Boolean::class) unitsOrEnum.split("|") else emptyList()
-
-fun <T : Any> PropertyDefinition<T>.format(value: T?): String = if (value == null) "---" else when (type) {
-	Float::class -> listOfNotNull("%.1f".format(value), units).joinToString(" ")
-	Boolean::class -> if (value as? Boolean == true)
-		options.getOrNull(0) ?: "ON" else options.getOrNull(1) ?: "OFF"
-	else -> value.toString()
-}
-
-fun <T> MutableStateFlow<T>.ensure(value: T) {
-	if (this.value != value) this.value = value
-}
+fun Context.isGranted(permission: String) =
+	checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED

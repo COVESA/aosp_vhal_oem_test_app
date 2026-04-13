@@ -2,18 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="global.covesa.aosp.vhal.test.app">
 
-    <uses-permission android:name="android.car.permission.CAR_INFO" />
-    <uses-permission android:name="android.car.permission.CAR_MILEAGE" />
-    <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ" />
-    <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_WRITE" />
-    <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ" />
-    <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE" />
     <uses-permission android:name="android.car.permission.oem.ADAS_ABS_IS_ENABLED_READ" />
     <uses-permission android:name="android.car.permission.oem.ADAS_ABS_IS_ENABLED_WRITE" />
     <uses-permission android:name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_READ" />
     <uses-permission android:name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_WRITE" />
     <uses-permission android:name="android.car.permission.oem.AMBIENT_LIGHT_READ" />
     <uses-permission android:name="android.car.permission.oem.AMBIENT_LIGHT_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL_READ" />
+    <uses-permission android:name="android.car.permission.oem.SPEED_READ" />
+    <uses-permission android:name="android.car.permission.oem.TRAVELED_DISTANCE_READ" />
 
     <application
         android:name=".Application"
