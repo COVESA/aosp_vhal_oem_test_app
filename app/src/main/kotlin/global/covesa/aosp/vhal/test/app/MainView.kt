@@ -269,35 +269,70 @@ private fun SwitchButton(@StringRes textId: Int,
 private fun MainViewPreview() {
 	AppTheme {
 		var ambientLight by remember {
-			mutableStateOf(VehicleProperty.AMBIENT_LIGHT.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "AMBIENT_LIGHT",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.AMBIENT_LIGHT_READ",
+							writePermission = "android.car.permission.oem.AMBIENT_LIGHT_WRITE",
+							unitsOrEnum = "ON|OFF"),
 					value = false,
 					hasError = false,
 					canRead = true,
 					canWrite = true))
 		}
 		var adasAbsIsEnabled by remember {
-			mutableStateOf(VehicleProperty.ADAS_ABS_IS_ENABLED.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 2,
+							name = "ADAS_ABS_IS_ENABLED",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.ADAS_ABS_IS_ENABLED_READ",
+							writePermission = null,
+							unitsOrEnum = "ENABLED|DISABLED"),
 					value = false,
 					hasError = false,
 					canRead = true,
 					canWrite = false))
 		}
 		var adasCruiseControlIsActive by remember {
-			mutableStateOf(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 3,
+							name = "ADAS_CRUISE_CONTROL_IS_ACTIVE",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_READ",
+							writePermission = "android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_WRITE",
+							unitsOrEnum = "ACTIVE|OFF"),
 					value = true,
 					hasError = false,
 					canRead = true,
 					canWrite = true))
 		}
 		var cabinRearShadeIsOpen by remember {
-			mutableStateOf(VehicleProperty.CABIN_REAR_SHADE_IS_OPEN.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 4,
+							name = "CABIN_REAR_SHADE_IS_OPEN",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ",
+							writePermission = "android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE",
+							unitsOrEnum = "OPEN|CLOSED"),
 					value = false,
 					hasError = false,
 					canRead = true,
 					canWrite = true))
 		}
 		var cabinSunroofShareIsOpen by remember {
-			mutableStateOf(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 5,
+							name = "CABIN_SUNROOF_SHADE_IS_OPEN",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ",
+							writePermission = null,
+							unitsOrEnum = "OPEN|CLOSED"),
 					value = true,
 					hasError = false,
 					canRead = true,
@@ -309,12 +344,35 @@ private fun MainViewPreview() {
 				adasCruiseControlIsActive = adasCruiseControlIsActive,
 				cabinRearShadeIsOpen = cabinRearShadeIsOpen,
 				cabinSunroofShareIsOpen = cabinSunroofShareIsOpen,
-				powertrainFuelSystemAbsoluteLevel = VehicleProperty.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL.copy(
+				powertrainFuelSystemAbsoluteLevel = PropertyValue(
+						definition = PropertyDefinition(
+								id = 6,
+								name = "POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL",
+								type = Float::class,
+								readPermission = "android.car.permission.oem.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL_READ",
+								writePermission = null,
+								unitsOrEnum = "l"),
 						value = 42.5f,
 						hasError = false,
 						canRead = true),
-				speed = VehicleProperty.SPEED.copy(value = 120f, hasError = false, canRead = true),
-				traveledDistance = VehicleProperty.TRAVELED_DISTANCE.copy(value = 1234.5f,
+				speed = PropertyValue(
+						definition = PropertyDefinition(
+								id = 7,
+								name = "SPEED",
+								type = Float::class,
+								readPermission = "android.car.permission.oem.SPEED_READ",
+								writePermission = null,
+								unitsOrEnum = "km/h"),
+						value = 120f, hasError = false, canRead = true),
+				traveledDistance = PropertyValue(
+						definition = PropertyDefinition(
+								id = 8,
+								name = "TRAVELED_DISTANCE",
+								type = Float::class,
+								readPermission = "android.car.permission.oem.TRAVELED_DISTANCE_READ",
+								writePermission = null,
+								unitsOrEnum = "km"),
+						value = 1234.5f,
 						hasError = false,
 						canRead = true),
 				error = "This is a test message",
@@ -348,35 +406,70 @@ private fun MainViewPreview() {
 private fun MainViewNoPermissionsPreview() {
 	AppTheme {
 		var ambientLight by remember {
-			mutableStateOf(VehicleProperty.AMBIENT_LIGHT.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "AMBIENT_LIGHT",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.AMBIENT_LIGHT_READ",
+							writePermission = "android.car.permission.oem.AMBIENT_LIGHT_WRITE",
+							unitsOrEnum = "ON|OFF"),
 					value = false,
 					hasError = false,
 					canRead = false,
 					canWrite = false))
 		}
 		var adasAbsIsEnabled by remember {
-			mutableStateOf(VehicleProperty.ADAS_ABS_IS_ENABLED.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 2,
+							name = "ADAS_ABS_IS_ENABLED",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.ADAS_ABS_IS_ENABLED_READ",
+							writePermission = null,
+							unitsOrEnum = "ENABLED|DISABLED"),
 					value = false,
 					hasError = false,
 					canRead = false,
 					canWrite = false))
 		}
 		var adasCruiseControlIsActive by remember {
-			mutableStateOf(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 3,
+							name = "ADAS_CRUISE_CONTROL_IS_ACTIVE",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_READ",
+							writePermission = "android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_WRITE",
+							unitsOrEnum = "ACTIVE|OFF"),
 					value = true,
 					hasError = false,
 					canRead = false,
 					canWrite = false))
 		}
 		var cabinRearShadeIsOpen by remember {
-			mutableStateOf(VehicleProperty.CABIN_REAR_SHADE_IS_OPEN.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 4,
+							name = "CABIN_REAR_SHADE_IS_OPEN",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ",
+							writePermission = "android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE",
+							unitsOrEnum = "OPEN|CLOSED"),
 					value = false,
 					hasError = false,
 					canRead = false,
 					canWrite = false))
 		}
 		var cabinSunroofShareIsOpen by remember {
-			mutableStateOf(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN.copy(
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 5,
+							name = "CABIN_SUNROOF_SHADE_IS_OPEN",
+							type = Boolean::class,
+							readPermission = "android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ",
+							writePermission = null,
+							unitsOrEnum = "OPEN|CLOSED"),
 					value = true,
 					hasError = false,
 					canRead = false,
@@ -388,12 +481,37 @@ private fun MainViewNoPermissionsPreview() {
 				adasCruiseControlIsActive = adasCruiseControlIsActive,
 				cabinRearShadeIsOpen = cabinRearShadeIsOpen,
 				cabinSunroofShareIsOpen = cabinSunroofShareIsOpen,
-				powertrainFuelSystemAbsoluteLevel = VehicleProperty.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL.copy(
+				powertrainFuelSystemAbsoluteLevel = PropertyValue(
+						definition = PropertyDefinition(
+								id = 6,
+								name = "POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL",
+								type = Float::class,
+								readPermission = "android.car.permission.oem.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL_READ",
+								writePermission = null,
+								unitsOrEnum = "l"),
 						value = 42.5f,
 						hasError = false,
 						canRead = false),
-				speed = VehicleProperty.SPEED.copy(value = 120f, hasError = false, canRead = false),
-				traveledDistance = VehicleProperty.TRAVELED_DISTANCE.copy(value = 1234.5f,
+				speed = PropertyValue(
+						definition = PropertyDefinition(
+								id = 7,
+								name = "SPEED",
+								type = Float::class,
+								readPermission = "android.car.permission.oem.SPEED_READ",
+								writePermission = null,
+								unitsOrEnum = "km/h"),
+						value = 120f,
+						hasError = false,
+						canRead = false),
+				traveledDistance = PropertyValue(
+						definition = PropertyDefinition(
+								id = 8,
+								name = "TRAVELED_DISTANCE",
+								type = Float::class,
+								readPermission = "android.car.permission.oem.TRAVELED_DISTANCE_READ",
+								writePermission = null,
+								unitsOrEnum = "km"),
+						value = 1234.5f,
 						hasError = false,
 						canRead = false),
 				error = "This is a test message",
