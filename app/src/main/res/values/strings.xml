@@ -2,7 +2,10 @@
     <string name="app_name">COVESA VHAL Test App</string>
     <string name="adas_abs_is_enabled">ADAS ABS: %s</string>
     <string name="adas_cruise_control_is_active">ADAS cruise control: %s</string>
-    <string name="ambient_light">Ambient light: %s</string>
     <string name="cabin_rear_shade_is_open">Cabin rear shade: %s</string>
+    <string name="cabin_seat_height_row_1_left">Height L: %s</string>
+    <string name="cabin_seat_height_row_1_right">Height R: %s</string>
+    <string name="cabin_seat_pos_row_1_left">Pos L: %s</string>
+    <string name="cabin_seat_pos_row_1_right">Pos R: %s</string>
     <string name="cabin_sunroof_shade_is_open">Cabin Sun roof shade: %s</string>
 </resources>

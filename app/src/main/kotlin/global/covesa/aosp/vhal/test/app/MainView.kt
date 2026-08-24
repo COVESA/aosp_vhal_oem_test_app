@@ -15,6 +15,7 @@
  */
 package global.covesa.aosp.vhal.test.app
 
+import android.car.VehicleAreaSeat
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -29,7 +30,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -53,10 +56,13 @@ import global.covesa.aosp.vhal.test.app.theme.AppTheme
 
 @Composable
 fun MainView(viewModel: PropertyViewModel = hiltViewModel()) {
-	val ambientLight by viewModel.ambientLight.collectAsState()
 	val adasAbsIsEnabled by viewModel.adasAbsIsEnabled.collectAsState()
 	val adasCruiseControlIsActive by viewModel.adasCruiseControlIsActive.collectAsState()
 	val cabinRearShadeIsOpen by viewModel.cabinRearShadeIsOpen.collectAsState()
+	val cabinSeatRow1LeftPosition by viewModel.cabinSeatRow1LeftPosition.collectAsState()
+	val cabinSeatRow1RightPosition by viewModel.cabinSeatRow1RightPosition.collectAsState()
+	val cabinSeatRow1LeftHeight by viewModel.cabinSeatRow1LeftHeight.collectAsState()
+	val cabinSeatRow1RightHeight by viewModel.cabinSeatRow1RightHeight.collectAsState()
 	val cabinSunroofShareIsOpen by viewModel.cabinSunroofShareIsOpen.collectAsState()
 	val powertrainFuelSystemAbsoluteLevel by viewModel.powertrainFuelSystemAbsoluteLevel.collectAsState()
 	val speed by viewModel.speed.collectAsState()
@@ -64,7 +70,10 @@ fun MainView(viewModel: PropertyViewModel = hiltViewModel()) {
 	val error by viewModel.error.collectAsState()
 
 	MainView(
-			ambientLight = ambientLight,
+			cabinSeatRow1LeftPosition = cabinSeatRow1LeftPosition,
+			cabinSeatRow1RightPosition = cabinSeatRow1RightPosition,
+			cabinSeatRow1LeftHeight = cabinSeatRow1LeftHeight,
+			cabinSeatRow1RightHeight = cabinSeatRow1RightHeight,
 			adasAbsIsEnabled = adasAbsIsEnabled,
 			adasCruiseControlIsActive = adasCruiseControlIsActive,
 			cabinRearShadeIsOpen = cabinRearShadeIsOpen,
@@ -73,12 +82,16 @@ fun MainView(viewModel: PropertyViewModel = hiltViewModel()) {
 			speed = speed,
 			traveledDistance = traveledDistance,
 			error = error,
-			onSwitch = { viewModel.set(it, it.value != true) },
+			onSwitch = { prop, value -> viewModel.set(prop, value) },
+			onChange = { prop, value -> viewModel.set(prop, value) },
 			onDismissError = viewModel::dismissError)
 }
 
 @Composable
-fun MainView(ambientLight: PropertyValue<Boolean>,
+fun MainView(cabinSeatRow1LeftPosition: PropertyValue<Int>,
+			 cabinSeatRow1RightPosition: PropertyValue<Int>,
+			 cabinSeatRow1LeftHeight: PropertyValue<Int>,
+			 cabinSeatRow1RightHeight: PropertyValue<Int>,
 			 adasAbsIsEnabled: PropertyValue<Boolean>,
 			 adasCruiseControlIsActive: PropertyValue<Boolean>,
 			 cabinRearShadeIsOpen: PropertyValue<Boolean>,
@@ -87,7 +100,8 @@ fun MainView(ambientLight: PropertyValue<Boolean>,
 			 speed: PropertyValue<Float>,
 			 traveledDistance: PropertyValue<Float>,
 			 error: String?,
-			 onSwitch: (PropertyValue<Boolean>) -> Unit,
+			 onSwitch: (PropertyValue<Boolean>, Boolean) -> Unit,
+			 onChange: (PropertyValue<Int>, Int) -> Unit,
 			 onDismissError: () -> Unit) {
 	Surface {
 		Box(modifier = Modifier.fillMaxSize()) {
@@ -111,7 +125,10 @@ fun MainView(ambientLight: PropertyValue<Boolean>,
 				if (!speed.canRead
 					&& !powertrainFuelSystemAbsoluteLevel.canRead
 					&& !traveledDistance.canRead
-					&& !ambientLight.canRead
+					&& !cabinSeatRow1LeftPosition.canRead
+					&& !cabinSeatRow1RightPosition.canRead
+					&& !cabinSeatRow1LeftHeight.canRead
+					&& !cabinSeatRow1RightHeight.canRead
 					&& !adasAbsIsEnabled.canRead
 					&& !adasCruiseControlIsActive.canRead
 					&& !cabinRearShadeIsOpen.canRead
@@ -148,10 +165,28 @@ fun MainView(ambientLight: PropertyValue<Boolean>,
 				Row(modifier = Modifier.fillMaxWidth().padding(start = 32.dp),
 						horizontalArrangement = Arrangement.SpaceEvenly) {
 					Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-						SwitchButton(
-								textId = R.string.ambient_light,
-								property = ambientLight,
-								onChecked = onSwitch)
+						Slider(textId = R.string.cabin_seat_pos_row_1_left,
+								property = cabinSeatRow1LeftPosition,
+								min = 0,
+								max = 1000,
+								onValueChange = onChange)
+						Slider(textId = R.string.cabin_seat_pos_row_1_right,
+								property = cabinSeatRow1RightPosition,
+								min = 0,
+								max = 1000,
+								onValueChange = onChange)
+					}
+					Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+						Slider(textId = R.string.cabin_seat_height_row_1_left,
+								property = cabinSeatRow1LeftHeight,
+								min = 0,
+								max = 1000,
+								onValueChange = onChange)
+						Slider(textId = R.string.cabin_seat_height_row_1_right,
+								property = cabinSeatRow1RightHeight,
+								min = 0,
+								max = 1000,
+								onValueChange = onChange)
 					}
 					Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 						SwitchButton(
@@ -249,7 +284,7 @@ private fun Gauge(
 @Composable
 private fun SwitchButton(@StringRes textId: Int,
 						 property: PropertyValue<Boolean>,
-						 onChecked: (PropertyValue<Boolean>) -> Unit,
+						 onChecked: (PropertyValue<Boolean>, Boolean) -> Unit,
 						 modifier: Modifier = Modifier) {
 	if (property.canRead) Row(
 			modifier = modifier,
@@ -257,10 +292,33 @@ private fun SwitchButton(@StringRes textId: Int,
 			verticalAlignment = Alignment.CenterVertically) {
 		Switch(checked = property.value == true,
 				enabled = property.canWrite,
-				onCheckedChange = { onChecked(property) })
+				onCheckedChange = { onChecked(property, it) })
 		Text(text = stringResource(textId, property.format()),
 				/*color = if (property.hasError) MaterialTheme.colorScheme.error else
 					MaterialTheme.colorScheme.onSurface*/)
+	}
+}
+
+@Composable
+private fun Slider(@StringRes textId: Int,
+				   property: PropertyValue<Int>,
+				   onValueChange: (PropertyValue<Int>, Int) -> Unit,
+				   modifier: Modifier = Modifier,
+				   min: Int = 0,
+				   max: Int = 100) {
+	if (property.canRead) Row(
+			modifier = modifier,
+			horizontalArrangement = Arrangement.spacedBy(16.dp),
+			verticalAlignment = Alignment.CenterVertically) {
+		Text(text = stringResource(textId, property.format()),
+				/*color = if (property.hasError) MaterialTheme.colorScheme.error else
+					MaterialTheme.colorScheme.onSurface*/)
+		Slider(modifier = Modifier.width(150.dp),
+				value = property.value?.toFloat() ?: min.toFloat(),
+				valueRange = min.toFloat()..max.toFloat(),
+				steps = max - min + 1,
+				enabled = property.canWrite,
+				onValueChange = { onValueChange(property, it.toInt()) })
 	}
 }
 
@@ -268,16 +326,62 @@ private fun SwitchButton(@StringRes textId: Int,
 @Composable
 private fun MainViewPreview() {
 	AppTheme {
-		var ambientLight by remember {
+		var cabinSeatRow1LeftPosition by remember {
 			mutableStateOf(PropertyValue(
 					definition = PropertyDefinition(
 							id = 1,
-							name = "AMBIENT_LIGHT",
-							type = Boolean::class,
-							readPermission = "android.car.permission.oem.AMBIENT_LIGHT_READ",
-							writePermission = "android.car.permission.oem.AMBIENT_LIGHT_WRITE",
-							unitsOrEnum = "ON|OFF"),
-					value = false,
+							name = "CABIN_SEAT_POSITION",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_LEFT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_POSITION_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_POSITION_WRITE",
+							unitsOrEnum = "mm"),
+					value = 100,
+					hasError = false,
+					canRead = true,
+					canWrite = false))
+		}
+		var cabinSeatRow1RightPosition by remember {
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "CABIN_SEAT_POSITION",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_RIGHT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_POSITION_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_POSITION_WRITE",
+							unitsOrEnum = "mm"),
+					value = 200,
+					hasError = false,
+					canRead = true,
+					canWrite = true))
+		}
+		var cabinSeatRow1LeftHeight by remember {
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "CABIN_SEAT_HEIGHT",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_LEFT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_WRITE",
+							unitsOrEnum = "mm"),
+					value = 300,
+					hasError = false,
+					canRead = true,
+					canWrite = false))
+		}
+		var cabinSeatRow1RightHeight by remember {
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "CABIN_SEAT_HEIGHT",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_RIGHT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_WRITE",
+							unitsOrEnum = "mm"),
+					value = 400,
 					hasError = false,
 					canRead = true,
 					canWrite = true))
@@ -339,7 +443,10 @@ private fun MainViewPreview() {
 					canWrite = false))
 		}
 		MainView(
-				ambientLight = ambientLight,
+				cabinSeatRow1LeftHeight = cabinSeatRow1LeftHeight,
+				cabinSeatRow1RightHeight = cabinSeatRow1RightHeight,
+				cabinSeatRow1LeftPosition = cabinSeatRow1LeftPosition,
+				cabinSeatRow1RightPosition = cabinSeatRow1RightPosition,
 				adasAbsIsEnabled = adasAbsIsEnabled,
 				adasCruiseControlIsActive = adasCruiseControlIsActive,
 				cabinRearShadeIsOpen = cabinRearShadeIsOpen,
@@ -376,25 +483,34 @@ private fun MainViewPreview() {
 						hasError = false,
 						canRead = true),
 				error = "This is a test message",
-				onSwitch = {
-					when (it.definition.id) {
-						ambientLight.definition.id -> ambientLight = ambientLight
-								.copy(value = it.value != true)
+				onSwitch = { prop, value ->
+					when (prop.definition.uid) {
+						adasAbsIsEnabled.definition.uid -> adasAbsIsEnabled =
+								adasAbsIsEnabled.copy(value = !value)
 
-						adasAbsIsEnabled.definition.id -> adasAbsIsEnabled = adasAbsIsEnabled
-								.copy(value = it.value != true)
+						adasCruiseControlIsActive.definition.uid -> adasCruiseControlIsActive =
+							adasCruiseControlIsActive.copy(value = !value)
 
-						adasCruiseControlIsActive.definition.id -> adasCruiseControlIsActive =
-							adasCruiseControlIsActive
-									.copy(value = it.value != true)
+						cabinRearShadeIsOpen.definition.uid -> cabinRearShadeIsOpen =
+							cabinRearShadeIsOpen.copy(value = !value)
 
-						cabinRearShadeIsOpen.definition.id -> cabinRearShadeIsOpen =
-							cabinRearShadeIsOpen
-									.copy(value = it.value != true)
+						cabinSunroofShareIsOpen.definition.uid -> cabinSunroofShareIsOpen =
+							cabinSunroofShareIsOpen.copy(value = !value)
+					}
+				},
+				onChange = { prop, value ->
+					when (prop.definition.uid) {
+						cabinSeatRow1LeftPosition.definition.uid -> cabinSeatRow1LeftPosition =
+							cabinSeatRow1LeftPosition.copy(value = value)
 
-						cabinSunroofShareIsOpen.definition.id -> cabinSunroofShareIsOpen =
-							cabinSunroofShareIsOpen
-									.copy(value = it.value != true)
+						cabinSeatRow1RightPosition.definition.uid -> cabinSeatRow1RightPosition =
+							cabinSeatRow1RightPosition.copy(value = value)
+
+						cabinSeatRow1LeftHeight.definition.uid -> cabinSeatRow1LeftHeight =
+							cabinSeatRow1LeftHeight.copy(value = value)
+
+						cabinSeatRow1RightHeight.definition.uid -> cabinSeatRow1RightHeight =
+							cabinSeatRow1RightHeight.copy(value = value)
 					}
 				},
 				onDismissError = {})
@@ -405,16 +521,62 @@ private fun MainViewPreview() {
 @Composable
 private fun MainViewNoPermissionsPreview() {
 	AppTheme {
-		var ambientLight by remember {
+		var cabinSeatRow1LeftPosition by remember {
 			mutableStateOf(PropertyValue(
 					definition = PropertyDefinition(
 							id = 1,
-							name = "AMBIENT_LIGHT",
-							type = Boolean::class,
-							readPermission = "android.car.permission.oem.AMBIENT_LIGHT_READ",
-							writePermission = "android.car.permission.oem.AMBIENT_LIGHT_WRITE",
-							unitsOrEnum = "ON|OFF"),
-					value = false,
+							name = "CABIN_SEAT_POSITION",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_LEFT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_POSITION_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_POSITION_WRITE",
+							unitsOrEnum = "mm"),
+					value = 100,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		var cabinSeatRow1RightPosition by remember {
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "CABIN_SEAT_POSITION",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_RIGHT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_POSITION_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_POSITION_WRITE",
+							unitsOrEnum = "mm"),
+					value = 200,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		var cabinSeatRow1LeftHeight by remember {
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "CABIN_SEAT_HEIGHT",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_LEFT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_WRITE",
+							unitsOrEnum = "mm"),
+					value = 300,
+					hasError = false,
+					canRead = false,
+					canWrite = false))
+		}
+		var cabinSeatRow1RightHeight by remember {
+			mutableStateOf(PropertyValue(
+					definition = PropertyDefinition(
+							id = 1,
+							name = "CABIN_SEAT_HEIGHT",
+							type = Int::class,
+							areaId = VehicleAreaSeat.SEAT_ROW_1_RIGHT,
+							readPermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_READ",
+							writePermission = "android.car.permission.oem.CABIN_SEAT_HEIGHT_WRITE",
+							unitsOrEnum = "mm"),
+					value = 400,
 					hasError = false,
 					canRead = false,
 					canWrite = false))
@@ -476,7 +638,10 @@ private fun MainViewNoPermissionsPreview() {
 					canWrite = false))
 		}
 		MainView(
-				ambientLight = ambientLight,
+				cabinSeatRow1LeftHeight = cabinSeatRow1LeftHeight,
+				cabinSeatRow1RightHeight = cabinSeatRow1RightHeight,
+				cabinSeatRow1LeftPosition = cabinSeatRow1LeftPosition,
+				cabinSeatRow1RightPosition = cabinSeatRow1RightPosition,
 				adasAbsIsEnabled = adasAbsIsEnabled,
 				adasCruiseControlIsActive = adasCruiseControlIsActive,
 				cabinRearShadeIsOpen = cabinRearShadeIsOpen,
@@ -515,25 +680,34 @@ private fun MainViewNoPermissionsPreview() {
 						hasError = false,
 						canRead = false),
 				error = "This is a test message",
-				onSwitch = {
-					when (it.definition.id) {
-						ambientLight.definition.id -> ambientLight = ambientLight
-								.copy(value = it.value != true)
+				onSwitch = { prop, value ->
+					when (prop.definition.uid) {
+						adasAbsIsEnabled.definition.uid -> adasAbsIsEnabled = adasAbsIsEnabled
+								.copy(value = !value)
 
-						adasAbsIsEnabled.definition.id -> adasAbsIsEnabled = adasAbsIsEnabled
-								.copy(value = it.value != true)
+						adasCruiseControlIsActive.definition.uid -> adasCruiseControlIsActive =
+							adasCruiseControlIsActive.copy(value = !value)
 
-						adasCruiseControlIsActive.definition.id -> adasCruiseControlIsActive =
-							adasCruiseControlIsActive
-									.copy(value = it.value != true)
+						cabinRearShadeIsOpen.definition.uid -> cabinRearShadeIsOpen =
+							cabinRearShadeIsOpen.copy(value = !value)
 
-						cabinRearShadeIsOpen.definition.id -> cabinRearShadeIsOpen =
-							cabinRearShadeIsOpen
-									.copy(value = it.value != true)
+						cabinSunroofShareIsOpen.definition.uid -> cabinSunroofShareIsOpen =
+							cabinSunroofShareIsOpen.copy(value = !value)
+					}
+				},
+				onChange = { prop, value ->
+					when (prop.definition.uid) {
+						cabinSeatRow1LeftPosition.definition.uid -> cabinSeatRow1LeftPosition =
+								cabinSeatRow1LeftPosition.copy(value = value)
 
-						cabinSunroofShareIsOpen.definition.id -> cabinSunroofShareIsOpen =
-							cabinSunroofShareIsOpen
-									.copy(value = it.value != true)
+						cabinSeatRow1RightPosition.definition.uid -> cabinSeatRow1RightPosition =
+								cabinSeatRow1RightPosition.copy(value = value)
+
+						cabinSeatRow1LeftHeight.definition.uid -> cabinSeatRow1LeftHeight =
+								cabinSeatRow1LeftHeight.copy(value = value)
+
+						cabinSeatRow1RightHeight.definition.uid -> cabinSeatRow1RightHeight =
+								cabinSeatRow1RightHeight.copy(value = value)
 					}
 				},
 				onDismissError = {})
