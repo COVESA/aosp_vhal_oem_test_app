@@ -15,12 +15,10 @@
  */
 package global.covesa.aosp.vhal.test.app
 
+import android.car.VehicleAreaSeat
 import android.car.oem.VehiclePropertyIdsOem
 
 object VehicleProperty {
-
-	val AMBIENT_LIGHT = defineProperty(
-			VehiclePropertyIdsOem::AMBIENT_LIGHT, enabled = "On", disabled = "Off")
 
 	val ADAS_ABS_IS_ENABLED = defineProperty(
 			VehiclePropertyIdsOem::ADAS_ABS_IS_ENABLED, enabled = "Enabled", disabled = "Disabled")
@@ -31,6 +29,26 @@ object VehicleProperty {
 
 	val CABIN_REAR_SHADE_IS_OPEN = defineProperty(
 			VehiclePropertyIdsOem::CABIN_REAR_SHADE_IS_OPEN, enabled = "Open", disabled = "Closed")
+
+	val CABIN_SEAT_ROW1_LEFT_POSITION = defineProperty<Int>(
+			VehiclePropertyIdsOem::CABIN_SEAT_POSITION, units = "mm",
+			areaId = VehicleAreaSeat.SEAT_ROW_1_LEFT,
+			isWriteable = true)
+
+	val CABIN_SEAT_ROW1_RIGHT_POSITION = defineProperty<Int>(
+			VehiclePropertyIdsOem::CABIN_SEAT_POSITION, units = "mm",
+			areaId = VehicleAreaSeat.SEAT_ROW_1_RIGHT,
+			isWriteable = true)
+
+	val CABIN_SEAT_ROW1_LEFT_HEIGHT = defineProperty<Int>(
+			VehiclePropertyIdsOem::CABIN_SEAT_HEIGHT, units = "mm",
+			areaId = VehicleAreaSeat.SEAT_ROW_1_LEFT,
+			isWriteable = true)
+
+	val CABIN_SEAT_ROW1_RIGHT_HEIGHT = defineProperty<Int>(
+			VehiclePropertyIdsOem::CABIN_SEAT_HEIGHT, units = "mm",
+			areaId = VehicleAreaSeat.SEAT_ROW_1_RIGHT,
+			isWriteable = true)
 
 	val CABIN_SUNROOF_SHARE_IS_OPEN = defineProperty(
 			VehiclePropertyIdsOem::CABIN_SUNROOF_SHADE_IS_OPEN,

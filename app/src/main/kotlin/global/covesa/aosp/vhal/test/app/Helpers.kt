@@ -23,10 +23,12 @@ val VEHICLE_PROPERTIES = mutableListOf<PropertyDefinition<*>>()
 
 inline fun <reified T : Any> defineProperty(property: KProperty0<Int>,
 											units: String,
+											areaId: Int = 0,
 											isWriteable: Boolean = false) = PropertyDefinition(
 		id = property.get(),
 		name = property.name,
 		type = T::class,
+		areaId = areaId,
 		readPermission = "android.car.permission.oem.${property.name}_READ",
 		writePermission = "android.car.permission.oem.${property.name}_WRITE".takeIf { isWriteable },
 		unitsOrEnum = units)
@@ -36,10 +38,12 @@ inline fun <reified T : Any> defineProperty(property: KProperty0<Int>,
 fun defineProperty(property: KProperty0<Int>,
 				   enabled: String,
 				   disabled: String,
+				   areaId: Int = 0,
 				   isWriteable: Boolean = true) = PropertyDefinition(
 		id = property.get(),
 		name = property.name,
 		type = Boolean::class,
+		areaId = areaId,
 		readPermission = "android.car.permission.oem.${property.name}_READ",
 		writePermission = "android.car.permission.oem.${property.name}_WRITE".takeIf { isWriteable },
 		unitsOrEnum = "${enabled}|${disabled}")

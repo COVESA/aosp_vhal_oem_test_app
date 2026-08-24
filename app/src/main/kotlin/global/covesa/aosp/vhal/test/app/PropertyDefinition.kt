@@ -20,9 +20,14 @@ import kotlin.reflect.KClass
 data class PropertyDefinition<T : Any>(val id: Int,
 									   val name: String,
 									   val type: KClass<T>,
+									   val areaId: Int = 0,
 									   val readPermission: String,
 									   val writePermission: String?,
 									   val unitsOrEnum: String) {
+
+	val uid: String
+		get() = "$id-$areaId"
+
 	val permissions: List<String>
 		get() = listOfNotNull(readPermission, writePermission)
 

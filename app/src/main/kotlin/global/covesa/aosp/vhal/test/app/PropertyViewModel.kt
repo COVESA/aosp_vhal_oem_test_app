@@ -41,14 +41,16 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 		private val LOG_TAG = PropertyViewModel::class.simpleName
 	}
 
+	private val CarPropertyValue<*>.uid: String
+		get() = "${propertyId}-${areaId}"
 
 	private var car: Car? = null
 	private var carPropertyManager: CarPropertyManager? = null
 	private var carPropertyEventCallback: CarPropertyEventCallback = object : CarPropertyEventCallback {
 		override fun onChangeEvent(value: CarPropertyValue<*>) {
-			val property = VEHICLE_PROPERTIES.first { it.id == value.propertyId }
-			Log.d(LOG_TAG, "Changed ${property.name}: ${value.value} (${value})")
-			update(value.propertyId, value.value)
+			val property = VEHICLE_PROPERTIES.firstOrNull { it.uid == value.uid }
+			Log.d(LOG_TAG, "Changed ${property?.name}: ${value.value} (${value})")
+			update(value.uid, value.value)
 		}
 
 		override fun onErrorEvent(propId: Int, zone: Int) {
@@ -60,15 +62,24 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 	private val _error = MutableStateFlow<String?>(null)
 	val error = _error.asStateFlow()
 
-	private val _ambientLight = MutableStateFlow(VehicleProperty.AMBIENT_LIGHT)
-	val ambientLight = _ambientLight.asStateFlow()
-
 	private val _adasAbsIsEnabled = MutableStateFlow(VehicleProperty.ADAS_ABS_IS_ENABLED)
 	val adasAbsIsEnabled = _adasAbsIsEnabled.asStateFlow()
 
 	private val _adasCruiseControlIsActive =
 		MutableStateFlow(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE)
 	val adasCruiseControlIsActive = _adasCruiseControlIsActive.asStateFlow()
+
+	private val _cabinSeatRow1LeftPosition = MutableStateFlow(VehicleProperty.CABIN_SEAT_ROW1_LEFT_POSITION)
+	val cabinSeatRow1LeftPosition = _cabinSeatRow1LeftPosition.asStateFlow()
+
+	private val _cabinSeatRow1RightPosition = MutableStateFlow(VehicleProperty.CABIN_SEAT_ROW1_RIGHT_POSITION)
+	val cabinSeatRow1RightPosition = _cabinSeatRow1RightPosition.asStateFlow()
+
+	private val _cabinSeatRow1LeftHeight = MutableStateFlow(VehicleProperty.CABIN_SEAT_ROW1_LEFT_HEIGHT)
+	val cabinSeatRow1LeftHeight = _cabinSeatRow1LeftHeight.asStateFlow()
+
+	private val _cabinSeatRow1RightHeight = MutableStateFlow(VehicleProperty.CABIN_SEAT_ROW1_RIGHT_HEIGHT)
+	val cabinSeatRow1RightHeight = _cabinSeatRow1RightHeight.asStateFlow()
 
 	private val _cabinSunroofShareIsOpen =
 		MutableStateFlow(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN)
@@ -92,39 +103,50 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 			while (isActive) {
 				for (property in VEHICLE_PROPERTIES) {
 					val canRead = context.isGranted(property.readPermission)
-					val canWrite = property.writePermission
-							?.let { context.isGranted(it) } ?: false
+					val canWrite = property.writePermission?.let { context.isGranted(it) } ?: false
 
-					when (property.id) {
-						_ambientLight.value.definition.id -> update(_ambientLight,
+					when (property.uid) {
+						_adasAbsIsEnabled.value.definition.uid -> update(_adasAbsIsEnabled,
 								canRead,
 								canWrite)
 
-						_adasAbsIsEnabled.value.definition.id -> update(_adasAbsIsEnabled,
-								canRead,
-								canWrite)
-
-						_adasCruiseControlIsActive.value.definition.id -> update(
+						_adasCruiseControlIsActive.value.definition.uid -> update(
 								_adasCruiseControlIsActive,
 								canRead,
 								canWrite)
 
-						_cabinSunroofShareIsOpen.value.definition.id -> update(
+						_cabinSeatRow1LeftPosition.value.definition.uid -> update(_cabinSeatRow1LeftPosition,
+								canRead,
+								canWrite)
+
+						_cabinSeatRow1RightPosition.value.definition.uid -> update(_cabinSeatRow1RightPosition,
+								canRead,
+								canWrite)
+
+						_cabinSeatRow1LeftHeight.value.definition.uid -> update(_cabinSeatRow1LeftHeight,
+								canRead,
+								canWrite)
+
+						_cabinSeatRow1RightHeight.value.definition.uid -> update(_cabinSeatRow1RightHeight,
+								canRead,
+								canWrite)
+
+						_cabinSunroofShareIsOpen.value.definition.uid -> update(
 								_cabinSunroofShareIsOpen,
 								canRead,
 								canWrite)
 
-						_cabinRearShadeIsOpen.value.definition.id -> update(_cabinRearShadeIsOpen,
+						_cabinRearShadeIsOpen.value.definition.uid -> update(_cabinRearShadeIsOpen,
 								canRead,
 								canWrite)
 
-						_powertrainFuelSystemAbsoluteLevel.value.definition.id -> update(
+						_powertrainFuelSystemAbsoluteLevel.value.definition.uid -> update(
 								_powertrainFuelSystemAbsoluteLevel,
 								canRead,
 								canWrite)
 
-						_speed.value.definition.id -> update(_speed, canRead, canWrite)
-						_traveledDistance.value.definition.id -> update(_traveledDistance,
+						_speed.value.definition.uid -> update(_speed, canRead, canWrite)
+						_traveledDistance.value.definition.uid -> update(_traveledDistance,
 								canRead,
 								canWrite)
 					}
@@ -152,7 +174,7 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 
 	fun <T : Any> set(property: PropertyValue<T>, value: T) {
 		writeProperty(property, value)
-		update(property.definition.id, value)
+		update(property.definition.uid, value)
 	}
 
 	override fun onCleared() {
@@ -179,9 +201,12 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 
 			// Get initial values
 			try {
-				_ambientLight.value = readProperty(VehicleProperty.AMBIENT_LIGHT)
 				_adasAbsIsEnabled.value = readProperty(VehicleProperty.ADAS_ABS_IS_ENABLED)
 				_adasCruiseControlIsActive.value = readProperty(VehicleProperty.ADAS_CRUISE_CONTROL_IS_ACTIVE)
+				_cabinSeatRow1LeftPosition.value = readProperty(VehicleProperty.CABIN_SEAT_ROW1_LEFT_POSITION)
+				_cabinSeatRow1RightPosition.value = readProperty(VehicleProperty.CABIN_SEAT_ROW1_RIGHT_POSITION)
+				_cabinSeatRow1LeftHeight.value = readProperty(VehicleProperty.CABIN_SEAT_ROW1_LEFT_HEIGHT)
+				_cabinSeatRow1RightHeight.value = readProperty(VehicleProperty.CABIN_SEAT_ROW1_RIGHT_HEIGHT)
 				_cabinRearShadeIsOpen.value = readProperty(VehicleProperty.CABIN_REAR_SHADE_IS_OPEN)
 				_cabinSunroofShareIsOpen.value = readProperty(VehicleProperty.CABIN_SUNROOF_SHARE_IS_OPEN)
 				_powertrainFuelSystemAbsoluteLevel.value = readProperty(VehicleProperty.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL)
@@ -197,7 +222,7 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 	}
 
 	private fun <T : Any> readProperty(property: PropertyValue<T>) = try {
-		val value: T? = carPropertyManager?.getProperty<T>(property.definition.id, 0)?.getValue()
+		val value: T? = carPropertyManager?.getProperty<T>(property.definition.id, property.definition.areaId)?.getValue()
 		Log.d(LOG_TAG, "readPropertyBool: ${property.definition.name} = ${value}")
 		property.copy(value = value, hasError = value != null)
 	} catch (e: Exception) {
@@ -232,30 +257,34 @@ class PropertyViewModel @Inject constructor(@param:ApplicationContext private va
 		}
 	}
 
-	private fun update(propertyId: Int, value: Any) = when (propertyId) {
-		_ambientLight.value.definition.id -> update(_ambientLight, value)
-		_adasAbsIsEnabled.value.definition.id -> update(_adasAbsIsEnabled, value)
-		_adasCruiseControlIsActive.value.definition.id -> update(_adasCruiseControlIsActive, value)
-		_cabinSunroofShareIsOpen.value.definition.id -> update(_cabinSunroofShareIsOpen, value)
-		_cabinRearShadeIsOpen.value.definition.id -> update(_cabinRearShadeIsOpen, value)
-		_powertrainFuelSystemAbsoluteLevel.value.definition.id -> update(
-				_powertrainFuelSystemAbsoluteLevel,
-				value)
+	private fun update(uniqueId: String, value: Any) {
+		when (uniqueId) {
+			_adasAbsIsEnabled.value.definition.uid -> update(_adasAbsIsEnabled, value)
+			_adasCruiseControlIsActive.value.definition.uid -> update(_adasCruiseControlIsActive, value)
+			_cabinSeatRow1LeftPosition.value.definition.uid -> update(_cabinSeatRow1LeftPosition, value)
+			_cabinSeatRow1RightPosition.value.definition.uid -> update(_cabinSeatRow1RightPosition, value)
+			_cabinSeatRow1LeftHeight.value.definition.uid -> update(_cabinSeatRow1LeftHeight, value)
+			_cabinSeatRow1RightHeight.value.definition.uid -> update(_cabinSeatRow1RightHeight, value)
+			_cabinSunroofShareIsOpen.value.definition.uid -> update(_cabinSunroofShareIsOpen, value)
+			_cabinRearShadeIsOpen.value.definition.uid -> update(_cabinRearShadeIsOpen, value)
+			_powertrainFuelSystemAbsoluteLevel.value.definition.uid -> update(
+					_powertrainFuelSystemAbsoluteLevel,
+					value)
 
-		_speed.value.definition.id -> update(_speed, value)
-		_traveledDistance.value.definition.id -> update(_traveledDistance, value)
-		else -> {}
+			_speed.value.definition.uid -> update(_speed, value)
+			_traveledDistance.value.definition.uid -> update(_traveledDistance, value)
+			else -> {}
+		}
 	}
 
 	private fun <T : Any> writeProperty(property: PropertyValue<T>, value: T) {
-		Log.d(LOG_TAG,
-				"writePropertyBool: ${property.definition.name} = ${property.value} -> ${value}")
+		Log.d(LOG_TAG, "writeProperty: ${property.definition.name} (areaId=${property.definition.areaId}) = ${property.value} -> ${value}")
 		if (property.value != value) try {
 			carPropertyManager!!.setProperty(property.definition.type.java,
 					property.definition.id,
-					0,
+					property.definition.areaId,
 					value)
-			update(property.definition.id, value)
+			update(property.definition.uid, value)
 		} catch (_: Exception) {
 			showError("Error setting value for property ${property.definition.name}!")
 		}

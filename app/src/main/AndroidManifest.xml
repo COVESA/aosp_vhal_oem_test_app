@@ -6,10 +6,12 @@
     <uses-permission android:name="android.car.permission.oem.ADAS_ABS_IS_ENABLED_WRITE" />
     <uses-permission android:name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_READ" />
     <uses-permission android:name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_WRITE" />
-    <uses-permission android:name="android.car.permission.oem.AMBIENT_LIGHT_READ" />
-    <uses-permission android:name="android.car.permission.oem.AMBIENT_LIGHT_WRITE" />
     <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ" />
     <uses-permission android:name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SEAT_HEIGHT_READ" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SEAT_HEIGHT_WRITE" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SEAT_POSITION_READ" />
+    <uses-permission android:name="android.car.permission.oem.CABIN_SEAT_POSITION_WRITE" />
     <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ" />
     <uses-permission android:name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_WRITE" />
     <uses-permission android:name="android.car.permission.oem.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL_READ" />
