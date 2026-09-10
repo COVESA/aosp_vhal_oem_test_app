@@ -1,0 +1,16 @@
+{
+   "connections": [
+      {
+         "name": "mock",
+         "protocol": "websocket",
+         "serverIp": "10.0.2.2",
+         "serverPort": 8126
+      },
+      {
+         "name": "kuksa",
+         "protocol": "grpc",
+         "serverIp": "10.0.2.2",
+         "serverPort": 55556
+      }
+   ]
+}

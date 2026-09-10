@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <package pattern=".*">
+        <!-- To enable all permissions for any package use this -->
+        <!--<permission name="android.car.permission.oem.*"/>-->
+    </package>
+
+    <!-- Specific permissions for our app -->
+    <package pattern="global\.covesa\.aosp\.vhal\.test\.app">
+        <permission name="android.car.permission.oem.ADAS_ABS_IS_ENABLED_READ" />
+        <!--<permission name="android.car.permission.oem.ADAS_ABS_IS_ENABLED_WRITE" />-->
+        <permission name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_READ" />
+        <!--<permission name="android.car.permission.oem.ADAS_CRUISE_CONTROL_IS_ACTIVE_WRITE" />-->
+        <permission name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_READ" />
+        <!--<permission name="android.car.permission.oem.CABIN_REAR_SHADE_IS_OPEN_WRITE" />-->
+        <permission name="android.car.permission.oem.CABIN_SEAT_HEIGHT_READ" />
+        <!--<permission name="android.car.permission.oem.CABIN_SEAT_HEIGHT_WRITE" />-->
+        <permission name="android.car.permission.oem.CABIN_SEAT_POSITION_READ" />
+        <!--<permission name="android.car.permission.oem.CABIN_SEAT_POSITION_WRITE" />-->
+        <permission name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_READ" />
+        <!--<permission name="android.car.permission.oem.CABIN_SUNROOF_SHADE_IS_OPEN_WRITE" />-->
+        <!--<permission name="android.car.permission.oem.POWERTRAIN_FUEL_SYSTEM_ABSOLUTE_LEVEL_READ" />-->
+        <permission name="android.car.permission.oem.SPEED_READ" />
+        <permission name="android.car.permission.oem.TRAVELED_DISTANCE_READ" />
+        <permission name="android.car.permission.oem.POWERTRAIN_RANGE_READ" />
+    </package>
+</permissions>
